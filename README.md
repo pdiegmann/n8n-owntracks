@@ -128,8 +128,8 @@ bun link n8n-nodes-owntracks
 #### Option 2: Install from npm (when published)
 ```bash
 npm install -g n8n-nodes-owntracks
- # or with Bun:
- bun add -g n8n-nodes-owntracks
+# or with Bun:
+bun add -g n8n-nodes-owntracks
 ```
 
 #### Option 3: Install via n8n UI
@@ -312,8 +312,8 @@ Ensure repository secrets include `NPM_TOKEN` (npm publish token with access to 
 After publishing, users can install via:
 ```bash
 npm install -g n8n-nodes-owntracks
- # or with Bun:
- bun add -g n8n-nodes-owntracks
+# or with Bun:
+bun add -g n8n-nodes-owntracks
 ```
 
 ### Systemd Service

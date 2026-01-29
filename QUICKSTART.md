@@ -123,8 +123,8 @@ docker-compose logs -f
 
 ```bash
 npm install -g n8n-nodes-owntracks
- # or with Bun:
- bun add -g n8n-nodes-owntracks
+# or with Bun:
+bun add -g n8n-nodes-owntracks
 ```
 
 Restart n8n, and you'll see the "OwnTracks Trigger" node available.
