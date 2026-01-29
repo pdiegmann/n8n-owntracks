@@ -56,6 +56,7 @@ git tag nodes-v1.2.3
 git push origin nodes-v1.2.3
 ```
 3. The `release-n8n-node.yml` workflow builds and publishes to npm using `NPM_TOKEN` (configured in repository secrets).
+   For manual releases, you can substitute `bun publish` for `npm publish` if preferred.
 
 ## Bug Reports
 

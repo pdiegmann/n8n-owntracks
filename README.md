@@ -46,10 +46,10 @@ n8n-owntracks/
 
 ### Prerequisites
 - Docker + Docker Compose (recommended for production)
-- Bun >= 1.3.0 (development/builds only; production uses Docker + npm)
+- Bun >= 1.3.0 (development/builds; can also be used for production runtime if desired)
 - n8n instance (for using the custom nodes)
 
-For production deployments, use the Docker Compose flow below and install the n8n node via npm or the n8n UI.
+For production deployments, use the Docker Compose flow below and install the n8n node via npm, Bun, or the n8n UI.
 
 ### Installation
 
@@ -128,6 +128,8 @@ bun link n8n-nodes-owntracks
 #### Option 2: Install from npm (when published)
 ```bash
 npm install -g n8n-nodes-owntracks
+ # or with Bun:
+ bun add -g n8n-nodes-owntracks
 ```
 
 #### Option 3: Install via n8n UI
@@ -303,12 +305,15 @@ git tag nodes-v1.2.3
 git push origin nodes-v1.2.3
 ```
 3. The `release-n8n-node.yml` workflow builds and publishes to npm using the `NPM_TOKEN` secret.
+   For manual releases, you can substitute `bun publish` in place of `npm publish` if preferred.
 
 Ensure repository secrets include `NPM_TOKEN` (npm publish token with access to the package).
 
 After publishing, users can install via:
 ```bash
 npm install -g n8n-nodes-owntracks
+ # or with Bun:
+ bun add -g n8n-nodes-owntracks
 ```
 
 ### Systemd Service
@@ -441,8 +446,8 @@ bun run clean
 ### Production Install Notes
 
 - Prefer Docker Compose for running the backend in production.
-- Install the n8n node with npm or the n8n community nodes UI.
-- Keep Bun for local development and CI builds, not production runtime.
+- Install the n8n node with npm, Bun, or the n8n community nodes UI.
+- Bun can also run the backend in production if desired, but Docker is still recommended.
 
 ### Testing Locally
 
