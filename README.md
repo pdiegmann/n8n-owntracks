@@ -45,11 +45,21 @@ n8n-owntracks/
 ## Quick Start
 
 ### Prerequisites
-- Bun >= 1.3.0
+- Docker + Docker Compose (recommended for production)
+- Bun >= 1.3.0 (for local development/builds)
 - n8n instance (for using the custom nodes)
+
+For production deployments, use the Docker Compose flow below and install the n8n node via npm or the n8n UI.
 
 ### Installation
 
+#### Production (Docker Compose)
+```bash
+cp packages/backend/config.example.yaml config.yaml
+docker-compose up -d
+```
+
+#### Local development (Bun)
 1. **Clone the repository:**
 ```bash
 git clone https://github.com/pdiegmann/n8n-owntracks.git
@@ -115,9 +125,9 @@ cd ~/.n8n
 bun link n8n-nodes-owntracks
 ```
 
-#### Option 2: Install from Bun (when published)
+#### Option 2: Install from npm (when published)
 ```bash
-bun add -g n8n-nodes-owntracks
+npm install -g n8n-nodes-owntracks
 ```
 
 #### Option 3: Install via n8n UI
@@ -257,38 +267,48 @@ OwnTracks HTTP mode can send device identifiers via headers. The backend uses th
 
 ### Docker (Recommended)
 
-Create a `Dockerfile` for the backend:
+Use the provided Dockerfile and docker-compose.yml for production deployments:
 
-```dockerfile
-FROM oven/bun:1.3.8-alpine
-
-WORKDIR /app
-
-# Copy package files
-COPY package.json ./
-COPY packages/backend/package.json ./packages/backend/
-
-# Install dependencies
-RUN bun install --production
-
-# Copy source
-COPY packages/backend ./packages/backend
-COPY tsconfig.json ./
-
-# Build
-RUN bun run build --workspace=@n8n-owntracks/backend
-
-# Expose port
-EXPOSE 3000
-
-# Start server
-CMD ["bun", "packages/backend/dist/index.js"]
+```bash
+cp packages/backend/config.example.yaml config.yaml
+docker-compose up -d
 ```
 
-Build and run:
+The backend image build uses the root Dockerfile and outputs a runtime container that listens on port 3000.
+
+## Release & Publishing
+
+### Backend Docker Image
+
+1. Build and tag the backend image:
 ```bash
-docker build -t owntracks-backend .
-docker run -p 3000:3000 -v $(pwd)/config.yaml:/app/config.yaml -v $(pwd)/data:/app/data owntracks-backend
+docker build -t ghcr.io/pdiegmann/n8n-owntracks-backend:latest .
+```
+
+2. Push the image:
+```bash
+docker push ghcr.io/pdiegmann/n8n-owntracks-backend:latest
+```
+
+3. Update tags as needed for versioned releases (e.g. `v1.2.3`).
+
+### n8n Node Package (npm)
+
+1. Build the node package:
+```bash
+cd packages/n8n-nodes-owntracks
+bun install
+bun run build
+```
+
+2. Publish to npm:
+```bash
+npm publish --access public
+```
+
+3. After publishing, users can install via:
+```bash
+npm install -g n8n-nodes-owntracks
 ```
 
 ### Systemd Service
@@ -335,6 +355,50 @@ server {
 }
 ```
 
+### Traefik + Docker Compose Example
+
+```yaml
+version: "3.8"
+services:
+  owntracks-backend:
+    image: ghcr.io/pdiegmann/n8n-owntracks-backend:latest
+    environment:
+      - NODE_ENV=production
+      - CONFIG_PATH=/app/packages/backend/config.yaml
+    volumes:
+      - ./config.yaml:/app/packages/backend/config.yaml:ro
+      - ./data:/app/data
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.owntracks.rule=Host(`owntracks.example.com`)"
+      - "traefik.http.routers.owntracks.entrypoints=websecure"
+      - "traefik.http.routers.owntracks.tls.certresolver=letsencrypt"
+      - "traefik.http.services.owntracks.loadbalancer.server.port=3000"
+    networks:
+      - web
+
+  traefik:
+    image: traefik:v2.11
+    command:
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--entrypoints.websecure.address=:443"
+      - "--certificatesresolvers.letsencrypt.acme.tlschallenge=true"
+      - "--certificatesresolvers.letsencrypt.acme.email=you@example.com"
+      - "--certificatesresolvers.letsencrypt.acme.storage=/letsencrypt/acme.json"
+    ports:
+      - "443:443"
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+      - "./letsencrypt:/letsencrypt"
+    networks:
+      - web
+
+networks:
+  web:
+    external: true
+```
+
 ## Security Considerations
 
 1. **Use HTTPS** - Always use HTTPS in production to protect location data
@@ -367,6 +431,11 @@ bun run build --workspace=n8n-nodes-owntracks
 # Clean build artifacts
 bun run clean
 ```
+
+### Production Install Notes
+
+- Prefer Docker Compose for running the backend in production.
+- Install the n8n node with npm or the n8n community nodes UI.
 
 ### Testing Locally
 

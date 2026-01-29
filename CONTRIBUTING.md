@@ -31,6 +31,36 @@ Thank you for your interest in contributing to n8n-owntracks!
 3. Update the README.md with details of changes if applicable
 4. The PR will be reviewed by maintainers
 
+## Release Process (Maintainers)
+
+### Backend Docker Image
+
+1. Build and tag the image:
+```bash
+docker build -t ghcr.io/pdiegmann/n8n-owntracks-backend:latest .
+```
+
+2. Push the image:
+```bash
+docker push ghcr.io/pdiegmann/n8n-owntracks-backend:latest
+```
+
+3. Tag versioned releases (e.g. `v1.2.3`) for reproducible deploys.
+
+### n8n Node Package (npm)
+
+1. Build the package:
+```bash
+cd packages/n8n-nodes-owntracks
+bun install
+bun run build
+```
+
+2. Publish to npm:
+```bash
+npm publish --access public
+```
+
 ## Bug Reports
 
 When filing a bug report, please include:
