@@ -1,0 +1,18 @@
+server:
+  host: 127.0.0.1
+  port: 3000
+  cors: true
+
+auth:
+  enabled: false
+
+encryption:
+  enabled: false
+
+database:
+  path: ./data/owntracks-test.db
+  ttl: 86400
+
+logging:
+  level: info
+  pretty: true
