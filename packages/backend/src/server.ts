@@ -68,12 +68,19 @@ export async function createServer(
   // OwnTracks HTTP endpoint - POST
   server.post('/owntracks', async (request: FastifyRequest, reply: FastifyReply) => {
     try {
+      if (!request.body || request.body === '') {
+        return [];
+      }
+
       let payload = request.body;
 
       // Handle encrypted payloads
-      if (typeof payload === 'string' && config.encryption.enabled && config.encryption.key) {
-        if (isEncrypted(payload)) {
-          payload = decryptPayload(payload, config.encryption.key);
+      if (config.encryption.enabled && config.encryption.key) {
+        if (typeof payload === 'object' && payload && (payload as any)._type === 'encrypted') {
+          payload = await decryptPayload((payload as any).data, config.encryption.key);
+          logger.debug('Decrypted OwnTracks payload');
+        } else if (typeof payload === 'string' && isEncrypted(payload)) {
+          payload = await decryptPayload(payload, config.encryption.key);
           logger.debug('Decrypted OwnTracks payload');
         }
       }
@@ -86,12 +93,17 @@ export async function createServer(
 
       // Handle different OwnTracks message types
       const messageType = (payload as any)._type;
+      const deviceFromHeader = (request.headers['x-limit-d'] as string | undefined)?.trim();
 
       if (messageType === 'location') {
         // Validate required fields for location
         if (typeof (payload as any).lat !== 'number' || typeof (payload as any).lon !== 'number') {
           reply.code(400).send({ error: 'Invalid location data: lat and lon are required' });
           return;
+        }
+
+        if (deviceFromHeader && !(payload as any).device) {
+          (payload as any).device = deviceFromHeader;
         }
 
         // Add timestamp if not present
