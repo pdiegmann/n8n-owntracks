@@ -1,0 +1,50 @@
+# Contributing to n8n-owntracks
+
+Thank you for your interest in contributing to n8n-owntracks!
+
+## Development Setup
+
+1. Fork and clone the repository
+2. Install dependencies: `npm install`
+3. Build the project: `npm run build`
+4. Make your changes
+5. Test your changes
+6. Submit a pull request
+
+## Code Style
+
+- Use TypeScript for all code
+- Follow the existing code style
+- Run linters before committing
+- Add comments for complex logic
+
+## Testing
+
+- Test backend API endpoints manually
+- Ensure TypeScript compilation succeeds
+- Verify n8n nodes work correctly
+
+## Pull Request Process
+
+1. Update documentation if needed
+2. Ensure all tests pass
+3. Update the README.md with details of changes if applicable
+4. The PR will be reviewed by maintainers
+
+## Bug Reports
+
+When filing a bug report, please include:
+- Description of the issue
+- Steps to reproduce
+- Expected behavior
+- Actual behavior
+- Environment details (OS, Node version, etc.)
+
+## Feature Requests
+
+Feature requests are welcome! Please describe:
+- The feature you'd like to see
+- Why it would be useful
+- How it might work
+
+Thank you for contributing!
