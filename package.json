@@ -7,10 +7,10 @@
     "packages/*"
   ],
   "scripts": {
-    "build": "bun run --workspaces build",
-    "dev": "bun run --workspaces dev",
-    "lint": "bun run --workspaces lint",
-    "clean": "bun run --workspaces clean && rm -rf node_modules bun_modules"
+    "build": "bun run --filter @n8n-owntracks/backend build && bun run --filter n8n-nodes-owntracks build",
+    "dev": "bun run --filter @n8n-owntracks/backend dev",
+    "lint": "bun run --filter @n8n-owntracks/backend lint && bun run --filter n8n-nodes-owntracks lint",
+    "clean": "bun run --filter @n8n-owntracks/backend clean && bun run --filter n8n-nodes-owntracks clean && rm -rf node_modules bun_modules"
   },
   "keywords": [
     "owntracks",

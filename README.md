@@ -84,7 +84,7 @@ server:
 auth:
   enabled: true
   username: admin
-   password: $argon2id$... # Use Bun.password to hash your password
+   password: $2b$... # Use Bun.password to hash your password
 
 database:
   path: ./data/owntracks.db
@@ -234,7 +234,7 @@ You can override YAML config with environment variables:
 SERVER_HOST=0.0.0.0
 SERVER_PORT=3000
 AUTH_USERNAME=admin
-AUTH_PASSWORD=$argon2id$...
+AUTH_PASSWORD=$2b$...
 ENCRYPTION_KEY=your-secret-key
 DB_PATH=/data/owntracks.db
 DB_TTL=2592000
@@ -266,7 +266,6 @@ WORKDIR /app
 
 # Copy package files
 COPY package.json ./
-COPY bun.lockb ./
 COPY packages/backend/package.json ./packages/backend/
 
 # Install dependencies

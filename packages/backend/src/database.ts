@@ -95,7 +95,7 @@ export class LocationDatabase {
       )
     `);
 
-    const result = stmt.run([
+    const params = [
       data._type,
       data.tid || null,
       data.lat,
@@ -115,7 +115,8 @@ export class LocationDatabase {
       data.device || null,
       JSON.stringify(data),
       Math.floor(Date.now() / 1000),
-    ]);
+    ];
+    const result = stmt.run(...params);
 
     return result.lastInsertRowid as number;
   }
