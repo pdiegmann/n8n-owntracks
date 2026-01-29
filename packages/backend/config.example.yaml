@@ -1,0 +1,28 @@
+# OwnTracks Backend Configuration
+
+# Server settings
+server:
+  host: 0.0.0.0
+  port: 3000
+  cors: true
+
+# Authentication (optional)
+auth:
+  enabled: false
+  # username: admin
+  # password: $2b$10$... (bcrypt hashed password)
+
+# Encryption for OwnTracks encrypted payloads (optional)
+encryption:
+  enabled: false
+  # key: your-secret-encryption-key
+
+# Database settings
+database:
+  path: ./data/owntracks.db
+  ttl: 2592000  # 30 days in seconds
+
+# Logging
+logging:
+  level: info  # fatal, error, warn, info, debug, trace
+  pretty: true

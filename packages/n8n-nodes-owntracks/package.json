@@ -1,0 +1,48 @@
+{
+  "name": "n8n-nodes-owntracks",
+  "version": "1.0.0",
+  "description": "n8n community node for OwnTracks location tracking integration",
+  "keywords": [
+    "n8n-community-node-package",
+    "n8n",
+    "owntracks",
+    "location",
+    "tracking"
+  ],
+  "license": "MIT",
+  "homepage": "https://github.com/pdiegmann/n8n-owntracks",
+  "author": {
+    "name": "n8n-owntracks",
+    "email": ""
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/pdiegmann/n8n-owntracks.git"
+  },
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "clean": "rm -rf dist"
+  },
+  "files": [
+    "dist"
+  ],
+  "n8n": {
+    "n8nNodesApiVersion": 1,
+    "credentials": [
+      "dist/credentials/OwnTracksApi.credentials.js"
+    ],
+    "nodes": [
+      "dist/nodes/OwnTracks/OwnTracksTrigger.node.js"
+    ]
+  },
+  "dependencies": {
+    "n8n-workflow": "^1.30.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.5",
+    "typescript": "^5.3.3"
+  }
+}
