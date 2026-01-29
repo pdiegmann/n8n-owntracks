@@ -13,9 +13,9 @@ Successfully implemented a complete monorepo bridging OwnTracks and n8n as a lig
 **Features:**
 - Fastify-based HTTP server for OwnTracks HTTP JSON endpoints
 - YAML configuration with environment variable overrides
-- Basic Authentication support with bcrypt password hashing
+- Basic Authentication support with Bun password hashing
 - Encryption/decryption support for OwnTracks encrypted payloads
-- SQLite database with better-sqlite3
+- SQLite database with Bun's built-in connector
 - Configurable TTL with automatic data expiration
 - Automatic cleanup every hour
 - Comprehensive REST API endpoints:
@@ -107,10 +107,10 @@ Successfully implemented a complete monorepo bridging OwnTracks and n8n as a lig
 - ✅ Dependency updates: Security vulnerabilities fixed
 
 **Security Measures:**
-- Updated bcrypt from 5.1.1 to 6.0.0 (CVE fix)
+- Updated Bun hashing usage
 - Updated n8n-workflow to 1.50.0
 - Basic Authentication implemented
-- Password hashing with bcrypt
+- Password hashing with Bun.password
 - Optional payload encryption support
 - Input validation with Zod
 
@@ -118,16 +118,16 @@ Successfully implemented a complete monorepo bridging OwnTracks and n8n as a lig
 
 ### Technology Stack
 - **Language:** TypeScript 5.3.3
-- **Runtime:** Node.js 18+
+- **Runtime:** Bun 1.3+
 - **Backend Framework:** Fastify 4.26.0
-- **Database:** SQLite (better-sqlite3 9.4.0)
+- **Database:** SQLite (Bun built-in)
 - **Configuration:** YAML parser
 - **Validation:** Zod 3.22.4
 - **Logging:** Pino 8.17.2
 - **n8n Integration:** n8n-workflow 1.50.0
 
 ### Architecture Decisions
-1. **Monorepo:** Using npm workspaces for clean separation
+1. **Monorepo:** Using Bun workspaces for clean separation
 2. **Lightweight:** No heavy frameworks, minimal dependencies
 3. **Type Safety:** Full TypeScript with strict mode
 4. **Security First:** Authentication, encryption, secure defaults
@@ -186,8 +186,8 @@ n8n-owntracks/
 **Solution:** Used string literal 'main' instead of enum value
 
 ### 4. Security Vulnerabilities
-**Problem:** bcrypt 5.1.1 had known CVEs
-**Solution:** Updated to bcrypt 6.0.0
+**Problem:** Node-based hashing required native dependencies
+**Solution:** Use Bun.password for hashing/verification
 
 ## Metrics & Statistics
 

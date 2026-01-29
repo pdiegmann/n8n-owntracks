@@ -1,7 +1,6 @@
-import Database from 'better-sqlite3';
 import fs from 'fs';
 import path from 'path';
-import type { Database as DatabaseType } from 'better-sqlite3';
+import { Database } from 'bun:sqlite';
 
 /**
  * OwnTracks location data structure
@@ -33,7 +32,7 @@ export interface LocationData {
  * Database manager for OwnTracks location data
  */
 export class LocationDatabase {
-  private db: DatabaseType;
+  private db: Database;
   private ttl: number; // TTL in seconds
 
   constructor(dbPath: string, ttl: number = 2592000) {
@@ -86,37 +85,38 @@ export class LocationDatabase {
    * Insert location data
    */
   insertLocation(data: any): number {
-    const stmt = this.db.prepare(`
+    const stmt = this.db.query(`
       INSERT INTO locations (
         _type, tid, lat, lon, acc, alt, batt, bs, conn, tst,
         vac, vel, cog, rad, t, topic, device, raw_json, created_at
       ) VALUES (
-        @_type, @tid, @lat, @lon, @acc, @alt, @batt, @bs, @conn, @tst,
-        @vac, @vel, @cog, @rad, @t, @topic, @device, @raw_json, @created_at
+        ?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10,
+        ?11, ?12, ?13, ?14, ?15, ?16, ?17, ?18, ?19
       )
     `);
 
-    const result = stmt.run({
-      _type: data._type,
-      tid: data.tid || null,
-      lat: data.lat,
-      lon: data.lon,
-      acc: data.acc || null,
-      alt: data.alt || null,
-      batt: data.batt || null,
-      bs: data.bs || null,
-      conn: data.conn || null,
-      tst: data.tst,
-      vac: data.vac || null,
-      vel: data.vel || null,
-      cog: data.cog || null,
-      rad: data.rad || null,
-      t: data.t || null,
-      topic: data.topic || null,
-      device: data.device || null,
-      raw_json: JSON.stringify(data),
-      created_at: Math.floor(Date.now() / 1000),
-    });
+    const params = [
+      data._type,
+      data.tid || null,
+      data.lat,
+      data.lon,
+      data.acc || null,
+      data.alt || null,
+      data.batt || null,
+      data.bs || null,
+      data.conn || null,
+      data.tst,
+      data.vac || null,
+      data.vel || null,
+      data.cog || null,
+      data.rad || null,
+      data.t || null,
+      data.topic || null,
+      data.device || null,
+      JSON.stringify(data),
+      Math.floor(Date.now() / 1000),
+    ];
+    const result = stmt.run(...params);
 
     return result.lastInsertRowid as number;
   }
@@ -125,30 +125,28 @@ export class LocationDatabase {
    * Get recent locations
    */
   getLocations(limit: number = 100, device?: string): LocationData[] {
-    let stmt;
     if (device) {
-      stmt = this.db.prepare(`
+      const stmt = this.db.query(`
         SELECT * FROM locations 
         WHERE device = ?
         ORDER BY tst DESC 
         LIMIT ?
       `);
       return stmt.all(device, limit) as LocationData[];
-    } else {
-      stmt = this.db.prepare(`
-        SELECT * FROM locations 
-        ORDER BY tst DESC 
-        LIMIT ?
-      `);
-      return stmt.all(limit) as LocationData[];
     }
+    const stmt = this.db.query(`
+      SELECT * FROM locations 
+      ORDER BY tst DESC 
+      LIMIT ?
+    `);
+    return stmt.all(limit) as LocationData[];
   }
 
   /**
    * Get location by ID
    */
   getLocation(id: number): LocationData | undefined {
-    const stmt = this.db.prepare('SELECT * FROM locations WHERE id = ?');
+    const stmt = this.db.query('SELECT * FROM locations WHERE id = ?');
     return stmt.get(id) as LocationData | undefined;
   }
 
@@ -161,7 +159,7 @@ export class LocationDatabase {
     }
 
     const expiryTimestamp = Math.floor(Date.now() / 1000) - this.ttl;
-    const stmt = this.db.prepare('DELETE FROM locations WHERE created_at < ?');
+    const stmt = this.db.query('DELETE FROM locations WHERE created_at < ?');
     const result = stmt.run(expiryTimestamp);
     return result.changes;
   }
@@ -170,10 +168,10 @@ export class LocationDatabase {
    * Get database statistics
    */
   getStats(): { totalRecords: number; oldestRecord: number | null; newestRecord: number | null } {
-    const countStmt = this.db.prepare('SELECT COUNT(*) as count FROM locations');
+    const countStmt = this.db.query('SELECT COUNT(*) as count FROM locations');
     const countResult = countStmt.get() as { count: number };
     
-    const rangeStmt = this.db.prepare('SELECT MIN(tst) as oldest, MAX(tst) as newest FROM locations');
+    const rangeStmt = this.db.query('SELECT MIN(tst) as oldest, MAX(tst) as newest FROM locations');
     const rangeResult = rangeStmt.get() as { oldest: number | null; newest: number | null };
 
     return {

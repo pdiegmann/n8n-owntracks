@@ -1,6 +1,5 @@
 import Fastify, { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
 import cors from '@fastify/cors';
-import bcrypt from 'bcrypt';
 import { Config } from './config';
 import { LocationDatabase } from './database';
 import { decryptPayload, isEncrypted } from './encryption';
@@ -47,7 +46,7 @@ export async function createServer(
       if (
         username !== config.auth.username ||
         !config.auth.password ||
-        !(await bcrypt.compare(password, config.auth.password))
+        !(await Bun.password.verify(password, config.auth.password))
       ) {
         reply.code(401).send({ error: 'Invalid credentials' });
         return;

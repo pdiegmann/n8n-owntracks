@@ -5,6 +5,8 @@ server:
 
 auth:
   enabled: false
+  # username: admin
+  # password: $2b$... (Bun.password hash)
 
 encryption:
   enabled: false

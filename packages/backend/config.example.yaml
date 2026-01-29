@@ -10,7 +10,7 @@ server:
 auth:
   enabled: false
   # username: admin
-  # password: $2b$10$... (bcrypt hashed password)
+  # password: $2b$... (Bun.password hash)
 
 # Encryption for OwnTracks encrypted payloads (optional)
 encryption:

@@ -45,8 +45,7 @@ n8n-owntracks/
 ## Quick Start
 
 ### Prerequisites
-- Node.js >= 18.0.0
-- npm >= 9.0.0
+- Bun >= 1.3.0
 - n8n instance (for using the custom nodes)
 
 ### Installation
@@ -59,12 +58,12 @@ cd n8n-owntracks
 
 2. **Install dependencies:**
 ```bash
-npm install
+bun install
 ```
 
 3. **Build all packages:**
 ```bash
-npm run build
+bun run build
 ```
 
 ### Backend Setup
@@ -85,23 +84,23 @@ server:
 auth:
   enabled: true
   username: admin
-  password: $2b$10$... # Use bcrypt to hash your password
+   password: $2b$... # Use Bun.password to hash your password
 
 database:
   path: ./data/owntracks.db
   ttl: 2592000  # 30 days
 ```
 
-3. **Generate bcrypt password (optional):**
+3. **Generate Bun password hash (optional):**
 ```bash
-node -e "const bcrypt = require('bcrypt'); bcrypt.hash('your-password', 10, (err, hash) => console.log(hash));"
+bun -e "const hash = await Bun.password.hash('your-password'); console.log(hash);"
 ```
 
 4. **Start the backend:**
 ```bash
-npm start
+bun run start
 # or for development with hot reload:
-npm run dev
+bun run dev
 ```
 
 The backend will start on `http://localhost:3000` (or your configured host/port).
@@ -111,14 +110,14 @@ The backend will start on `http://localhost:3000` (or your configured host/port)
 #### Option 1: Local Development
 ```bash
 cd packages/n8n-nodes-owntracks
-npm link
+bun link
 cd ~/.n8n
-npm link n8n-nodes-owntracks
+bun link n8n-nodes-owntracks
 ```
 
-#### Option 2: Install from npm (when published)
+#### Option 2: Install from Bun (when published)
 ```bash
-npm install -g n8n-nodes-owntracks
+bun add -g n8n-nodes-owntracks
 ```
 
 #### Option 3: Install via n8n UI
@@ -235,7 +234,7 @@ You can override YAML config with environment variables:
 SERVER_HOST=0.0.0.0
 SERVER_PORT=3000
 AUTH_USERNAME=admin
-AUTH_PASSWORD=$2b$10$...
+AUTH_PASSWORD=$2b$...
 ENCRYPTION_KEY=your-secret-key
 DB_PATH=/data/owntracks.db
 DB_TTL=2592000
@@ -261,29 +260,29 @@ OwnTracks HTTP mode can send device identifiers via headers. The backend uses th
 Create a `Dockerfile` for the backend:
 
 ```dockerfile
-FROM node:18-alpine
+FROM oven/bun:1.3.8-alpine
 
 WORKDIR /app
 
 # Copy package files
-COPY package*.json ./
-COPY packages/backend/package*.json ./packages/backend/
+COPY package.json ./
+COPY packages/backend/package.json ./packages/backend/
 
 # Install dependencies
-RUN npm install --workspace=@n8n-owntracks/backend
+RUN bun install --production
 
 # Copy source
 COPY packages/backend ./packages/backend
 COPY tsconfig.json ./
 
 # Build
-RUN npm run build --workspace=@n8n-owntracks/backend
+RUN bun run build --workspace=@n8n-owntracks/backend
 
 # Expose port
 EXPOSE 3000
 
 # Start server
-CMD ["node", "packages/backend/dist/index.js"]
+CMD ["bun", "packages/backend/dist/index.js"]
 ```
 
 Build and run:
@@ -305,7 +304,7 @@ After=network.target
 Type=simple
 User=owntracks
 WorkingDirectory=/opt/owntracks-backend
-ExecStart=/usr/bin/node dist/index.js
+ExecStart=/usr/bin/bun dist/index.js
 Restart=on-failure
 Environment=NODE_ENV=production
 
@@ -354,19 +353,19 @@ server {
 
 ```bash
 # Install dependencies
-npm install
+bun install
 
 # Build all packages
-npm run build
+bun run build
 
 # Start backend in dev mode (with hot reload)
-npm run dev --workspace=@n8n-owntracks/backend
+bun run dev
 
 # Build n8n nodes
-npm run build --workspace=n8n-nodes-owntracks
+bun run build --workspace=n8n-nodes-owntracks
 
 # Clean build artifacts
-npm run clean
+bun run clean
 ```
 
 ### Testing Locally
@@ -406,7 +405,7 @@ curl http://localhost:3000/health
 - Verify encryption key matches if using encryption
 
 ### n8n node not appearing
-- Ensure node is properly installed: `npm list -g n8n-nodes-owntracks`
+- Ensure node is properly installed: `bun pm ls -g n8n-nodes-owntracks`
 - Restart n8n after installation
 - Check n8n logs for errors
 - Verify package.json has correct n8n metadata
@@ -444,4 +443,3 @@ For issues and questions:
 - GitHub Issues: https://github.com/pdiegmann/n8n-owntracks/issues
 - OwnTracks Community: https://github.com/owntracks
 - n8n Community: https://community.n8n.io/
-
