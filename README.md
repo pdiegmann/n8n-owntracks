@@ -288,7 +288,7 @@ git tag backend-v1.2.3
 git push origin backend-v1.2.3
 ```
 3. The `release-backend.yml` workflow builds and pushes:
-   - `ghcr.io/pdiegmann/n8n-owntracks-backend:1.2.3`
+   - `ghcr.io/pdiegmann/n8n-owntracks-backend:1.2.3` (from `backend-v1.2.3`)
    - `ghcr.io/pdiegmann/n8n-owntracks-backend:latest`
 
 #### n8n node package (npm)
@@ -303,6 +303,8 @@ git tag nodes-v1.2.3
 git push origin nodes-v1.2.3
 ```
 3. The `release-n8n-node.yml` workflow builds and publishes to npm using the `NPM_TOKEN` secret.
+
+Ensure repository secrets include `NPM_TOKEN` (npm publish token with access to the package).
 
 After publishing, users can install via:
 ```bash
