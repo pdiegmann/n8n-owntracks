@@ -141,7 +141,7 @@ Configure your OwnTracks mobile app to send location data to your backend:
 
 For encrypted payloads:
 1. Enable **Encryption** in OwnTracks preferences
-2. Set your encryption key
+2. Set your encryption key (up to 32 characters; OwnTracks pads with zeroes)
 3. Add the same key to your backend `config.yaml`
 
 ## Usage
@@ -149,7 +149,7 @@ For encrypted payloads:
 ### Backend API Endpoints
 
 #### POST /owntracks
-Receives OwnTracks location data (used by OwnTracks app).
+Receives OwnTracks location data (used by OwnTracks app). The backend will accept empty payloads (OwnTracks can send zero-length payloads for deletions).
 
 **Request body example:**
 ```json
@@ -249,6 +249,10 @@ The TTL (Time To Live) setting automatically removes old location records:
 - Set to `0` to disable auto-expiration
 - Cleanup runs automatically every hour
 - Manual cleanup: `POST /cleanup`
+
+### OwnTracks HTTP headers
+
+OwnTracks HTTP mode can send device identifiers via headers. The backend uses the `X-Limit-D` header to populate the `device` field if it is missing from the payload.
 
 ## Deployment
 
@@ -440,3 +444,4 @@ For issues and questions:
 - GitHub Issues: https://github.com/pdiegmann/n8n-owntracks/issues
 - OwnTracks Community: https://github.com/owntracks
 - n8n Community: https://community.n8n.io/
+

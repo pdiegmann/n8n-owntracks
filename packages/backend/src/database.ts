@@ -156,6 +156,10 @@ export class LocationDatabase {
    * Clean up expired records based on TTL
    */
   cleanupExpired(): number {
+    if (this.ttl <= 0) {
+      return 0;
+    }
+
     const expiryTimestamp = Math.floor(Date.now() / 1000) - this.ttl;
     const stmt = this.db.prepare('DELETE FROM locations WHERE created_at < ?');
     const result = stmt.run(expiryTimestamp);

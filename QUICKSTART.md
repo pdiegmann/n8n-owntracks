@@ -30,6 +30,10 @@ server:
 auth:
   enabled: false  # Set to true for production
 
+encryption:
+  enabled: false  # Enable to decrypt OwnTracks encrypted payloads
+  # key: your-secret-encryption-key (up to 32 chars; OwnTracks pads with zeroes)
+
 database:
   path: ./data/owntracks.db
   ttl: 2592000  # 30 days
@@ -56,6 +60,7 @@ The server will start on http://localhost:3000
 4. Set **URL** to: `http://your-server-ip:3000/owntracks`
 5. If using auth, set **Authentication** to **Basic Auth**
 6. Set a **Device ID** (e.g., "my-phone")
+7. If using encrypted payloads, set the same encryption key in OwnTracks and your backend config
 
 ## Step 5: Test It!
 

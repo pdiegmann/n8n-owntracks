@@ -15,7 +15,7 @@ auth:
 # Encryption for OwnTracks encrypted payloads (optional)
 encryption:
   enabled: false
-  # key: your-secret-encryption-key
+  # key: your-secret-encryption-key (up to 32 chars; OwnTracks pads with zeros)
 
 # Database settings
 database:

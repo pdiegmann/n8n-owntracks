@@ -1,29 +1,33 @@
-import crypto from 'crypto';
+import sodium from 'libsodium-wrappers';
 
 /**
  * Decrypt OwnTracks encrypted payload
- * OwnTracks uses AES-256-CBC encryption
+ * OwnTracks uses libsodium secretbox (XSalsa20-Poly1305)
  */
-export function decryptPayload(encryptedData: string, key: string): any {
+export async function decryptPayload(encryptedData: string, key: string): Promise<any> {
   try {
-    // OwnTracks sends base64 encoded encrypted data
+    await sodium.ready;
+
     const buffer = Buffer.from(encryptedData, 'base64');
-    
-    // Extract IV (first 16 bytes) and encrypted data
-    const iv = buffer.slice(0, 16);
-    const encrypted = buffer.slice(16);
-    
-    // Create decipher
-    const keyBuffer = Buffer.from(key, 'utf8');
-    const keyHash = crypto.createHash('sha256').update(keyBuffer).digest();
-    const decipher = crypto.createDecipheriv('aes-256-cbc', keyHash, iv);
-    
-    // Decrypt
-    let decrypted = decipher.update(encrypted);
-    decrypted = Buffer.concat([decrypted, decipher.final()]);
-    
-    // Parse JSON
-    return JSON.parse(decrypted.toString('utf8'));
+    const nonceLength = sodium.crypto_secretbox_NONCEBYTES;
+
+    if (buffer.length <= nonceLength) {
+      throw new Error('Encrypted payload is too short');
+    }
+
+    const nonce = buffer.subarray(0, nonceLength);
+    const encrypted = buffer.subarray(nonceLength);
+
+    const keyBuffer = Buffer.alloc(sodium.crypto_secretbox_KEYBYTES);
+    Buffer.from(key, 'utf8').copy(keyBuffer, 0, 0, keyBuffer.length);
+
+    const decrypted = sodium.crypto_secretbox_open_easy(encrypted, nonce, keyBuffer);
+
+    if (!decrypted) {
+      throw new Error('Decryption failed');
+    }
+
+    return JSON.parse(Buffer.from(decrypted).toString('utf8'));
   } catch (error) {
     throw new Error(`Decryption failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
   }
