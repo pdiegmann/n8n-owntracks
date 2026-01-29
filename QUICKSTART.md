@@ -5,7 +5,7 @@ This guide will help you get up and running with n8n-owntracks in minutes.
 ## Prerequisites
 
 - Docker + Docker Compose (recommended for production)
-- Bun 1.3+ installed (for local development)
+- Bun 1.3+ installed (for local development builds only)
 - OwnTracks mobile app (iOS or Android)
 - n8n instance (optional, for using the trigger nodes)
 
@@ -126,6 +126,11 @@ npm install -g n8n-nodes-owntracks
 ```
 
 Restart n8n, and you'll see the "OwnTracks Trigger" node available.
+
+## Release Automation (Maintainers)
+
+- Tag `backend-vX.Y.Z` to trigger the GHCR Docker build and push workflow.
+- Tag `nodes-vX.Y.Z` (after bumping `packages/n8n-nodes-owntracks/package.json`) to publish to npm via GitHub Actions.
 
 ## Troubleshooting
 

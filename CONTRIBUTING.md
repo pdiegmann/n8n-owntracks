@@ -35,40 +35,27 @@ Thank you for your interest in contributing to n8n-owntracks!
 
 ### Backend Docker Image
 
-1. Build and tag the image:
+1. Merge changes to the default branch.
+2. Tag a release like `backend-v1.2.3`:
 ```bash
-docker build -t ghcr.io/pdiegmann/n8n-owntracks-backend:latest .
+git tag backend-v1.2.3
+git push origin backend-v1.2.3
 ```
-
-2. Push the image:
-```bash
-docker push ghcr.io/pdiegmann/n8n-owntracks-backend:latest
-```
-
-3. Tag and push versioned releases (e.g. `v1.2.3`) for reproducible deploys:
-```bash
-docker tag ghcr.io/pdiegmann/n8n-owntracks-backend:latest ghcr.io/pdiegmann/n8n-owntracks-backend:v1.2.3
-docker push ghcr.io/pdiegmann/n8n-owntracks-backend:v1.2.3
-```
+3. The `release-backend.yml` workflow builds and pushes `latest` and the versioned tag to GHCR.
 
 ### n8n Node Package (npm)
 
-1. Build the package:
+1. Bump the package version:
 ```bash
 cd packages/n8n-nodes-owntracks
-bun install
-bun run build
+npm version patch --no-git-tag-version
 ```
-
-2. Bump the version:
+2. Commit the version bump, then tag a release like `nodes-v1.2.3`:
 ```bash
-npm version patch
+git tag nodes-v1.2.3
+git push origin nodes-v1.2.3
 ```
-
-3. Publish to npm:
-```bash
-npm publish --access public
-```
+3. The `release-n8n-node.yml` workflow builds and publishes to npm using `NPM_TOKEN`.
 
 ## Bug Reports
 
