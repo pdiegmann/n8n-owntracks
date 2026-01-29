@@ -290,7 +290,11 @@ docker build -t ghcr.io/pdiegmann/n8n-owntracks-backend:latest .
 docker push ghcr.io/pdiegmann/n8n-owntracks-backend:latest
 ```
 
-3. Update tags as needed for versioned releases (e.g. `v1.2.3`).
+3. Tag and push a versioned release (e.g. `v1.2.3`):
+```bash
+docker tag ghcr.io/pdiegmann/n8n-owntracks-backend:latest ghcr.io/pdiegmann/n8n-owntracks-backend:v1.2.3
+docker push ghcr.io/pdiegmann/n8n-owntracks-backend:v1.2.3
+```
 
 ### n8n Node Package (npm)
 
@@ -301,12 +305,17 @@ bun install
 bun run build
 ```
 
-2. Publish to npm:
+2. Bump the version:
+```bash
+npm version patch
+```
+
+3. Publish to npm:
 ```bash
 npm publish --access public
 ```
 
-3. After publishing, users can install via:
+4. After publishing, users can install via:
 ```bash
 npm install -g n8n-nodes-owntracks
 ```
@@ -382,11 +391,15 @@ services:
     command:
       - "--providers.docker=true"
       - "--providers.docker.exposedbydefault=false"
+      - "--entrypoints.web.address=:80"
       - "--entrypoints.websecure.address=:443"
+      - "--entrypoints.web.http.redirections.entrypoint.to=websecure"
+      - "--entrypoints.web.http.redirections.entrypoint.scheme=https"
       - "--certificatesresolvers.letsencrypt.acme.tlschallenge=true"
       - "--certificatesresolvers.letsencrypt.acme.email=you@example.com"
       - "--certificatesresolvers.letsencrypt.acme.storage=/letsencrypt/acme.json"
     ports:
+      - "80:80"
       - "443:443"
     volumes:
       - "/var/run/docker.sock:/var/run/docker.sock:ro"
@@ -398,6 +411,8 @@ networks:
   web:
     external: true
 ```
+
+Create the external network once with `docker network create web`.
 
 ## Security Considerations
 

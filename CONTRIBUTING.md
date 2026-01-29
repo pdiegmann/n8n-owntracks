@@ -45,7 +45,11 @@ docker build -t ghcr.io/pdiegmann/n8n-owntracks-backend:latest .
 docker push ghcr.io/pdiegmann/n8n-owntracks-backend:latest
 ```
 
-3. Tag versioned releases (e.g. `v1.2.3`) for reproducible deploys.
+3. Tag and push versioned releases (e.g. `v1.2.3`) for reproducible deploys:
+```bash
+docker tag ghcr.io/pdiegmann/n8n-owntracks-backend:latest ghcr.io/pdiegmann/n8n-owntracks-backend:v1.2.3
+docker push ghcr.io/pdiegmann/n8n-owntracks-backend:v1.2.3
+```
 
 ### n8n Node Package (npm)
 
@@ -56,7 +60,12 @@ bun install
 bun run build
 ```
 
-2. Publish to npm:
+2. Bump the version:
+```bash
+npm version patch
+```
+
+3. Publish to npm:
 ```bash
 npm publish --access public
 ```
