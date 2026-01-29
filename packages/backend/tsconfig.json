@@ -4,8 +4,9 @@
     "outDir": "./dist",
     "rootDir": "./src",
     "composite": false,
-    "incremental": false
+    "incremental": false,
+    "types": ["bun"]
   },
   "include": ["src/**/*"],
-  "exclude": ["node_modules", "dist"]
+  "exclude": ["node_modules", "bun_modules", "dist"]
 }

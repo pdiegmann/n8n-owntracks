@@ -33,21 +33,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Deployment guides (systemd, nginx reverse proxy)
   - Contributing guidelines
 - Security
-  - Updated bcrypt to v6.0.0 (fixing CVE vulnerabilities)
+  - Updated Bun password hashing usage
   - CodeQL security scanning (0 vulnerabilities)
   - Secure password hashing
   - Optional payload encryption
 
 ### Technical Details
 - TypeScript throughout with strict type checking
-- npm workspaces for monorepo management
+ - Bun workspaces for monorepo management
 - Zod for configuration validation
-- Better-sqlite3 for lightweight database
+ - Bun SQLite for lightweight database
 - Proper n8n node structure following best practices
 
 ### Fixed
 - SQL syntax for index creation in SQLite
 - TypeScript compilation issues with n8n-workflow types
-- Dependency vulnerabilities (bcrypt, n8n-workflow)
+ - Dependency vulnerabilities (n8n-workflow)
 
 [1.0.0]: https://github.com/pdiegmann/n8n-owntracks/releases/tag/v1.0.0

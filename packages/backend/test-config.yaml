@@ -5,6 +5,8 @@ server:
 
 auth:
   enabled: false
+  # username: admin
+  # password: $argon2id$... (Bun.password hash)
 
 encryption:
   enabled: false

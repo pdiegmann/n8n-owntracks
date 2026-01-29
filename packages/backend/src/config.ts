@@ -13,7 +13,7 @@ export const ConfigSchema = z.object({
   auth: z.object({
     enabled: z.boolean().default(false),
     username: z.string().optional(),
-    password: z.string().optional(), // bcrypt hashed password
+    password: z.string().optional(), // Bun.password hash
   }).default({}),
   
   encryption: z.object({

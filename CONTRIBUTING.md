@@ -5,8 +5,8 @@ Thank you for your interest in contributing to n8n-owntracks!
 ## Development Setup
 
 1. Fork and clone the repository
-2. Install dependencies: `npm install`
-3. Build the project: `npm run build`
+2. Install dependencies: `bun install`
+3. Build the project: `bun run build`
 4. Make your changes
 5. Test your changes
 6. Submit a pull request

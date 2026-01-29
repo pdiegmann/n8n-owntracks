@@ -4,7 +4,7 @@ This guide will help you get up and running with n8n-owntracks in minutes.
 
 ## Prerequisites
 
-- Node.js 18+ installed
+- Bun 1.3+ installed
 - OwnTracks mobile app (iOS or Android)
 - n8n instance (optional, for using the trigger nodes)
 
@@ -13,8 +13,8 @@ This guide will help you get up and running with n8n-owntracks in minutes.
 ```bash
 git clone https://github.com/pdiegmann/n8n-owntracks.git
 cd n8n-owntracks
-npm install
-npm run build
+bun install
+bun run build
 ```
 
 ## Step 2: Configure the Backend
@@ -47,7 +47,7 @@ logging:
 
 ```bash
 cd packages/backend
-npm start
+bun run start
 ```
 
 The server will start on http://localhost:3000
@@ -90,9 +90,9 @@ curl http://localhost:3000/locations
 
 ```bash
 cd packages/n8n-nodes-owntracks
-npm link
+bun link
 cd ~/.n8n
-npm link n8n-nodes-owntracks
+bun link n8n-nodes-owntracks
 ```
 
 Restart n8n, and you'll see the "OwnTracks Trigger" node available.

@@ -20,12 +20,12 @@ TESTS_FAILED=0
 
 function test_passed() {
     echo -e "${GREEN}✓ $1${NC}"
-    ((TESTS_PASSED++))
+    TESTS_PASSED=$((TESTS_PASSED + 1))
 }
 
 function test_failed() {
     echo -e "${RED}✗ $1${NC}"
-    ((TESTS_FAILED++))
+    TESTS_FAILED=$((TESTS_FAILED + 1))
 }
 
 function test_info() {
@@ -34,10 +34,10 @@ function test_info() {
 
 # Test 1: Check dependencies
 echo "Test 1: Checking dependencies..."
-if [ -d "node_modules" ]; then
+if [ -d "node_modules" ] || [ -d "bun_modules" ]; then
     test_passed "Dependencies installed"
 else
-    test_failed "Dependencies not installed. Run: npm install"
+    test_failed "Dependencies not installed. Run: bun install"
     exit 1
 fi
 
@@ -48,7 +48,7 @@ if [ -f "packages/backend/dist/index.js" ] && [ -f "packages/n8n-nodes-owntracks
     test_passed "Projects built successfully"
 else
     test_info "Building projects..."
-    npm run build
+    bun run build
     if [ $? -eq 0 ]; then
         test_passed "Build successful"
     else
@@ -61,7 +61,7 @@ fi
 echo ""
 echo "Test 3: Starting backend server..."
 cd packages/backend
-CONFIG_PATH=test-config.yaml node dist/index.js > /tmp/test-backend.log 2>&1 &
+CONFIG_PATH=test-config.yaml bun dist/index.js > /tmp/test-backend.log 2>&1 &
 BACKEND_PID=$!
 cd ../..
 
