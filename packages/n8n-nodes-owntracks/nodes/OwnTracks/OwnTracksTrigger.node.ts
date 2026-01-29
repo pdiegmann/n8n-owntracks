@@ -4,7 +4,6 @@ import {
   ITriggerFunctions,
   ITriggerResponse,
   IDataObject,
-  NodeConnectionType,
 } from 'n8n-workflow';
 
 export class OwnTracksTrigger implements INodeType {
@@ -20,7 +19,7 @@ export class OwnTracksTrigger implements INodeType {
       name: 'OwnTracks Trigger',
     },
     inputs: [],
-    outputs: [NodeConnectionType.Main],
+    outputs: ['main'],
     credentials: [
       {
         name: 'ownTracksApi',

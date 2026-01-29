@@ -73,11 +73,12 @@ export class LocationDatabase {
         topic TEXT,
         device TEXT,
         raw_json TEXT NOT NULL,
-        created_at INTEGER NOT NULL,
-        INDEX idx_tst (tst),
-        INDEX idx_device (device),
-        INDEX idx_created_at (created_at)
+        created_at INTEGER NOT NULL
       );
+      
+      CREATE INDEX IF NOT EXISTS idx_tst ON locations(tst);
+      CREATE INDEX IF NOT EXISTS idx_device ON locations(device);
+      CREATE INDEX IF NOT EXISTS idx_created_at ON locations(created_at);
     `);
   }
 
