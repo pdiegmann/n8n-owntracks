@@ -54,9 +54,8 @@ npm version patch --no-git-tag-version
 ```bash
 git add package.json
 git commit -m "chore: bump n8n node version"
-git push
 git tag nodes-v1.2.3
-git push origin nodes-v1.2.3
+git push origin HEAD --follow-tags
 ```
 3. The `release-n8n-node.yml` workflow builds and publishes to npm using `NPM_TOKEN` (configured in repository secrets).
    For manual releases, you can substitute `bun publish` in place of `npm publish` if preferred, but verify npm-specific lifecycle hooks/config behave as expected.

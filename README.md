@@ -343,7 +343,7 @@ services:
       - ./data:/app/data
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.owntracks.rule=Host(`owntracks.example.com`)"
+      - "traefik.http.routers.owntracks.rule=Host(`yourdomain.com`)"
       - "traefik.http.routers.owntracks.entrypoints=websecure"
       - "traefik.http.routers.owntracks.tls.certresolver=letsencrypt"
       - "traefik.http.services.owntracks.loadbalancer.server.port=3000"
@@ -360,7 +360,7 @@ services:
       - "--entrypoints.web.http.redirections.entrypoint.to=websecure"
       - "--entrypoints.web.http.redirections.entrypoint.scheme=https"
       - "--certificatesresolvers.letsencrypt.acme.tlschallenge=true"
-      - "--certificatesresolvers.letsencrypt.acme.email=you@example.com"
+      - "--certificatesresolvers.letsencrypt.acme.email=your-email@example.com"
       - "--certificatesresolvers.letsencrypt.acme.storage=/letsencrypt/acme.json"
     ports:
       - "80:80"
