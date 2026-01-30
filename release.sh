@@ -2,6 +2,12 @@
 
 set -euo pipefail
 
+PACKAGE_FILES=(
+  "package.json"
+  "packages/backend/package.json"
+  "packages/n8n-nodes-owntracks/package.json"
+)
+
 RELEASE_TYPE="${1:-patch}"
 
 case "$RELEASE_TYPE" in
@@ -25,7 +31,7 @@ if [ -n "$(git status --porcelain)" ]; then
 fi
 
 rollback_versions() {
-  git checkout -- package.json packages/backend/package.json packages/n8n-nodes-owntracks/package.json
+  git checkout -- "${PACKAGE_FILES[@]}"
 }
 
 trap rollback_versions ERR
@@ -36,7 +42,7 @@ NEW_VERSION="${NEW_VERSION#v}"
 npm --prefix packages/backend version "$NEW_VERSION" --no-git-tag-version
 npm --prefix packages/n8n-nodes-owntracks version "$NEW_VERSION" --no-git-tag-version
 
-for pkg in package.json packages/backend/package.json packages/n8n-nodes-owntracks/package.json; do
+for pkg in "${PACKAGE_FILES[@]}"; do
   CURRENT_VERSION=$(node -p "require('./$pkg').version")
   if [ "$CURRENT_VERSION" != "$NEW_VERSION" ]; then
     echo "Version mismatch in $pkg: $CURRENT_VERSION (expected $NEW_VERSION)" >&2
@@ -51,7 +57,7 @@ fi
 
 trap - ERR
 
-git add package.json packages/backend/package.json packages/n8n-nodes-owntracks/package.json
+git add "${PACKAGE_FILES[@]}"
 git commit -m "chore: release v${NEW_VERSION}"
 git tag "v${NEW_VERSION}"
 
