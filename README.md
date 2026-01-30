@@ -274,6 +274,7 @@ Use the provided Dockerfile and docker-compose.yml for production deployments:
 
 ```bash
 cp packages/backend/config.example.yaml config.yaml
+# Edit config.yaml for production. Change database.path from ./data/owntracks.db to /app/data/owntracks.db for persistence.
 docker-compose up -d
 ```
 
@@ -330,6 +331,13 @@ server {
 ```
 
 ### Traefik + Docker Compose Example
+
+Create and edit the backend configuration before starting:
+
+```bash
+cp packages/backend/config.example.yaml config.yaml
+# Change database.path from ./data/owntracks.db to /app/data/owntracks.db for persistence.
+```
 
 ```yaml
 version: "3.8"
