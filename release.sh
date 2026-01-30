@@ -136,7 +136,7 @@ fi
 git add "${PACKAGE_FILES[@]}"
 git commit -m "chore: release v${NEW_VERSION}"
 COMMIT_CREATED="true"
-git tag "v${NEW_VERSION}"
+git tag -a "v${NEW_VERSION}" -m "Release v${NEW_VERSION}"
 TAG_CREATED="true"
 
 if git push origin HEAD --follow-tags; then
