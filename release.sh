@@ -32,7 +32,7 @@ if [ -n "$(git status --porcelain)" ]; then
   exit 1
 fi
 
-DEFAULT_BRANCH=$(git symbolic-ref refs/remotes/origin/HEAD 2>/dev/null | sed 's!^refs/remotes/origin/!!')
+DEFAULT_BRANCH=$(git rev-parse --abbrev-ref origin/HEAD 2>/dev/null | sed 's!^origin/!!')
 if [ -z "$DEFAULT_BRANCH" ]; then
   DEFAULT_BRANCH=$(git remote show origin 2>/dev/null | sed -n 's/^[[:space:]]*HEAD branch:[[:space:]]*//p' | head -n 1)
 fi
@@ -75,16 +75,13 @@ trap rollback_versions ERR INT TERM
 
 read_package_version() {
   local rel_path="$1"
-  local package_file
-  for package_file in "${PACKAGE_FILES[@]}"; do
-    if [ "$rel_path" = "$package_file" ]; then
-      local file_path="${ROOT_DIR}/${rel_path}"
-      if [ ! -f "$file_path" ]; then
-        echo "Missing package file: $file_path" >&2
-        exit 1
-      fi
-      local script
-      read -r -d '' script <<'EOF'
+  local file_path="${ROOT_DIR}/${rel_path}"
+  if [ ! -f "$file_path" ]; then
+    echo "Missing package file: $file_path" >&2
+    exit 1
+  fi
+  local script
+  read -r -d '' script <<'EOF'
 const fs = require('fs');
 try {
   const pkg = JSON.parse(fs.readFileSync(process.argv[1], 'utf8'));
@@ -97,21 +94,16 @@ try {
   process.exit(1);
 }
 EOF
-      local version
-      if ! version=$(bun -e "$script" "$file_path"); then
-        echo "Failed to read version from $file_path" >&2
-        exit 1
-      fi
-      if [ -z "$version" ]; then
-        echo "Failed to read version from $file_path" >&2
-        exit 1
-      fi
-      echo "$version"
-      return 0
-    fi
-  done
-  echo "Unexpected package path: $rel_path" >&2
-  exit 1
+  local version
+  if ! version=$(bun -e "$script" "$file_path"); then
+    echo "Failed to read version from $file_path" >&2
+    exit 1
+  fi
+  if [ -z "$version" ]; then
+    echo "Failed to read version from $file_path" >&2
+    exit 1
+  fi
+  echo "$version"
 }
 
 bun version "$RELEASE_TYPE" --no-git-tag-version >/dev/null
