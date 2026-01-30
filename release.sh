@@ -2,6 +2,8 @@
 
 set -euo pipefail
 
+ROOT_DIR=$(pwd)
+
 PACKAGE_FILES=(
   "package.json"
   "packages/backend/package.json"
@@ -30,33 +32,45 @@ if [ -n "$(git status --porcelain)" ]; then
   exit 1
 fi
 
-rollback_versions() {
-  echo "An error occurred. Rolling back version changes..." >&2
-  set +e
-  if [ "${TAG_CREATED}" = "true" ] && git rev-parse -q --verify "refs/tags/v${NEW_VERSION}" >/dev/null; then
-    git tag -d "v${NEW_VERSION}" >/dev/null 2>&1
-  fi
-  if [ "${COMMIT_CREATED}" = "true" ] && git rev-parse -q --verify HEAD~1 >/dev/null; then
-    git reset --hard HEAD~1 >/dev/null 2>&1
-  fi
-  git checkout HEAD -- "${PACKAGE_FILES[@]}" >/dev/null 2>&1
-}
-
-trap rollback_versions ERR INT TERM
-
 NEW_VERSION=""
 COMMIT_CREATED="false"
 TAG_CREATED="false"
 
+rollback_versions() {
+  trap - ERR INT TERM
+  echo "An error occurred. Rolling back version changes..." >&2
+  set +e
+  cd "$ROOT_DIR"
+  if [ "${TAG_CREATED}" = "true" ] && git rev-parse -q --verify "refs/tags/v${NEW_VERSION}" >/dev/null; then
+    git tag -d "v${NEW_VERSION}" >/dev/null 2>&1
+    TAG_CREATED="false"
+  fi
+  if [ "${COMMIT_CREATED}" = "true" ] && git rev-parse -q --verify HEAD~1 >/dev/null; then
+    git reset --hard HEAD~1 >/dev/null 2>&1
+    COMMIT_CREATED="false"
+  fi
+  git checkout HEAD -- "${PACKAGE_FILES[@]}" >/dev/null 2>&1
+  exit 1
+}
+
+trap rollback_versions ERR INT TERM
+
 get_version() {
-  bun -e "console.log(require('./$1').version)"
+  bun -e "console.log(require('${ROOT_DIR}/$1').version)"
 }
 
 bun version "$RELEASE_TYPE" --no-git-tag-version >/dev/null
 NEW_VERSION=$(get_version "package.json")
 
-(cd packages/backend && bun version "$NEW_VERSION" --no-git-tag-version)
-(cd packages/n8n-nodes-owntracks && bun version "$NEW_VERSION" --no-git-tag-version)
+bump_package_version() {
+  local dir="$1"
+  cd "${ROOT_DIR}/${dir}"
+  bun version "$NEW_VERSION" --no-git-tag-version
+  cd "$ROOT_DIR"
+}
+
+bump_package_version "packages/backend"
+bump_package_version "packages/n8n-nodes-owntracks"
 
 for pkg in "${PACKAGE_FILES[@]}"; do
   CURRENT_VERSION=$(get_version "$pkg")
