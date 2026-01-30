@@ -56,6 +56,7 @@ For production deployments, use the Docker Compose flow below and install the n8
 #### Production (Docker Compose)
 ```bash
 cp packages/backend/config.example.yaml config.yaml
+# Edit config.yaml for production. Ensure database.path is /app/data/owntracks.db for persistence.
 docker-compose up -d
 ```
 
@@ -338,6 +339,7 @@ services:
     environment:
       - NODE_ENV=production
       - CONFIG_PATH=/app/packages/backend/config.yaml
+      - DB_PATH=/app/data/owntracks.db
     volumes:
       - ./config.yaml:/app/packages/backend/config.yaml:ro
       - ./data:/app/data
