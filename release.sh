@@ -38,6 +38,7 @@ CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD)
 if [ -z "$DEFAULT_BRANCH" ]; then
   DEFAULT_BRANCH=$(git remote show origin 2>/dev/null | sed -n 's/^[[:space:]]*HEAD branch:[[:space:]]*//p' | head -n 1)
 fi
+DEFAULT_BRANCH=$(printf '%s' "$DEFAULT_BRANCH" | tr -d '[:space:]')
 
 if [ -z "$DEFAULT_BRANCH" ]; then
   echo "Unable to determine default branch. Ensure the remote default branch is configured (e.g., 'git remote set-head origin --auto')." >&2
@@ -96,8 +97,25 @@ read_package_version() {
     echo "Missing package file: $file_path" >&2
     exit 1
   fi
+  local script
+  read -r -d '' script <<'EOF'
+const fs = require('fs');
+try {
+  const pkg = JSON.parse(fs.readFileSync(process.argv[1], 'utf8'));
+  if (!pkg.version) {
+    throw new Error('missing version');
+  }
+  console.log(pkg.version);
+} catch (err) {
+  console.error(`Failed to read version from ${process.argv[1]}`);
+  process.exit(1);
+}
+EOF
   local version
-  version=$(bun -e "const fs = require('fs'); try { const pkg = JSON.parse(fs.readFileSync(process.argv[1], 'utf8')); if (!pkg.version) { throw new Error('missing version'); } console.log(pkg.version); } catch (err) { console.error('Failed to read version from ' + process.argv[1]); process.exit(1); }" "$file_path")
+  if ! version=$(bun -e "$script" "$file_path"); then
+    echo "Failed to read version from $file_path" >&2
+    exit 1
+  fi
   if [ -z "$version" ]; then
     echo "Failed to read version from $file_path" >&2
     exit 1
@@ -105,17 +123,8 @@ read_package_version() {
   echo "$version"
 }
 
-get_version() {
-  local rel_path="$1"
-  read_package_version "$rel_path"
-}
-
 bun version "$RELEASE_TYPE" --no-git-tag-version >/dev/null
-NEW_VERSION=$(get_version "package.json")
-if [ -z "$NEW_VERSION" ]; then
-  echo "Failed to determine new version from package.json." >&2
-  exit 1
-fi
+NEW_VERSION=$(read_package_version "package.json")
 
 bump_package_version() {
   local dir="$1"
@@ -128,7 +137,7 @@ bump_package_version "packages/backend"
 bump_package_version "packages/n8n-nodes-owntracks"
 
 for pkg in "${PACKAGE_FILES[@]}"; do
-  CURRENT_VERSION=$(get_version "$pkg")
+  CURRENT_VERSION=$(read_package_version "$pkg")
   if [ "$CURRENT_VERSION" != "$NEW_VERSION" ]; then
     echo "Version mismatch in $pkg: $CURRENT_VERSION (expected $NEW_VERSION)" >&2
     exit 1
