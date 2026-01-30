@@ -18,7 +18,7 @@ case "$RELEASE_TYPE" in
     ;;
 esac
 
-for command in git bun node; do
+for command in git bun; do
   if ! command -v "$command" >/dev/null 2>&1; then
     echo "Missing required command: $command" >&2
     exit 1
@@ -32,19 +32,34 @@ fi
 
 rollback_versions() {
   echo "An error occurred. Rolling back version changes..." >&2
-  git checkout HEAD -- "${PACKAGE_FILES[@]}"
+  set +e
+  if [ "${TAG_CREATED}" = "true" ] && git rev-parse -q --verify "refs/tags/v${NEW_VERSION}" >/dev/null; then
+    git tag -d "v${NEW_VERSION}" >/dev/null 2>&1
+  fi
+  if [ "${COMMIT_CREATED}" = "true" ] && git rev-parse -q --verify HEAD~1 >/dev/null; then
+    git reset --hard HEAD~1 >/dev/null 2>&1
+  fi
+  git checkout HEAD -- "${PACKAGE_FILES[@]}" >/dev/null 2>&1
 }
 
 trap rollback_versions ERR INT TERM
 
-bun version "$RELEASE_TYPE" --no-git-tag-version >/dev/null
-NEW_VERSION=$(node -p "require('./package.json').version")
+NEW_VERSION=""
+COMMIT_CREATED="false"
+TAG_CREATED="false"
 
-bun --prefix packages/backend version "$NEW_VERSION" --no-git-tag-version
-bun --prefix packages/n8n-nodes-owntracks version "$NEW_VERSION" --no-git-tag-version
+get_version() {
+  bun -e "console.log(require('./$1').version)"
+}
+
+bun version "$RELEASE_TYPE" --no-git-tag-version >/dev/null
+NEW_VERSION=$(get_version "package.json")
+
+(cd packages/backend && bun version "$NEW_VERSION" --no-git-tag-version)
+(cd packages/n8n-nodes-owntracks && bun version "$NEW_VERSION" --no-git-tag-version)
 
 for pkg in "${PACKAGE_FILES[@]}"; do
-  CURRENT_VERSION=$(node -p "require('./$pkg').version")
+  CURRENT_VERSION=$(get_version "$pkg")
   if [ "$CURRENT_VERSION" != "$NEW_VERSION" ]; then
     echo "Version mismatch in $pkg: $CURRENT_VERSION (expected $NEW_VERSION)" >&2
     exit 1
@@ -58,13 +73,10 @@ fi
 
 git add "${PACKAGE_FILES[@]}"
 git commit -m "chore: release v${NEW_VERSION}"
+COMMIT_CREATED="true"
 git tag "v${NEW_VERSION}"
+TAG_CREATED="true"
 
-trap - ERR
-
-if git push origin HEAD --follow-tags; then
-  echo "Release v${NEW_VERSION} created and pushed."
-else
-  echo "Failed to push release v${NEW_VERSION}." >&2
-  exit 1
-fi
+git push origin HEAD --follow-tags
+trap - ERR INT TERM
+echo "Release v${NEW_VERSION} created and pushed."
