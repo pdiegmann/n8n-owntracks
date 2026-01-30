@@ -2,7 +2,7 @@
 
 set -euo pipefail
 
-ROOT_DIR=$(pwd)
+ROOT_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
 
 PACKAGE_FILES=(
   "package.json"
@@ -32,6 +32,14 @@ if [ -n "$(git status --porcelain)" ]; then
   exit 1
 fi
 
+DEFAULT_BRANCH=$(git symbolic-ref refs/remotes/origin/HEAD | sed 's!^refs/remotes/origin/!!')
+CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD)
+
+if [ "$CURRENT_BRANCH" != "$DEFAULT_BRANCH" ]; then
+  echo "Release script must be run from the default branch ('$DEFAULT_BRANCH'), but you are on '$CURRENT_BRANCH'." >&2
+  exit 1
+fi
+
 NEW_VERSION=""
 COMMIT_CREATED="false"
 TAG_CREATED="false"
@@ -57,7 +65,7 @@ rollback_versions() {
 trap rollback_versions ERR INT TERM
 
 get_version() {
-  bun -e "console.log(require('${ROOT_DIR}/$1').version)"
+  FILE_PATH="${ROOT_DIR}/$1" bun -e "console.log(require(process.env.FILE_PATH).version)"
 }
 
 bun version "$RELEASE_TYPE" --no-git-tag-version >/dev/null
