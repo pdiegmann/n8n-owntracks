@@ -36,11 +36,11 @@ DEFAULT_BRANCH=$(git symbolic-ref refs/remotes/origin/HEAD 2>/dev/null | sed 's!
 CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD)
 
 if [ -z "$DEFAULT_BRANCH" ]; then
-  DEFAULT_BRANCH=$(git remote show origin 2>/dev/null | sed -n 's/  HEAD branch: //p' | head -n 1)
+  DEFAULT_BRANCH=$(git remote show origin 2>/dev/null | sed -n 's/^[[:space:]]*HEAD branch:[[:space:]]*//p' | head -n 1)
 fi
 
 if [ -z "$DEFAULT_BRANCH" ]; then
-  echo "Unable to determine default branch. Run 'git remote set-head origin --auto' to set origin/HEAD." >&2
+  echo "Unable to determine default branch. Ensure the remote default branch is configured (e.g., 'git remote set-head origin --auto')." >&2
   exit 1
 fi
 
@@ -88,14 +88,34 @@ validate_package_path() {
   fi
 }
 
-get_version() {
+read_package_version() {
   local rel_path="$1"
   validate_package_path "$rel_path"
-  FILE_PATH="${ROOT_DIR}/${rel_path}" bun -e "const fs = require('fs'); const pkg = JSON.parse(fs.readFileSync(process.env.FILE_PATH, 'utf8')); console.log(pkg.version)"
+  local file_path="${ROOT_DIR}/${rel_path}"
+  if [ ! -f "$file_path" ]; then
+    echo "Missing package file: $file_path" >&2
+    exit 1
+  fi
+  local version
+  version=$(bun -e "const fs = require('fs'); try { const pkg = JSON.parse(fs.readFileSync(process.argv[1], 'utf8')); if (!pkg.version) { throw new Error('missing version'); } console.log(pkg.version); } catch (err) { console.error('Failed to read version from ' + process.argv[1]); process.exit(1); }" "$file_path")
+  if [ -z "$version" ]; then
+    echo "Failed to read version from $file_path" >&2
+    exit 1
+  fi
+  echo "$version"
+}
+
+get_version() {
+  local rel_path="$1"
+  read_package_version "$rel_path"
 }
 
 bun version "$RELEASE_TYPE" --no-git-tag-version >/dev/null
 NEW_VERSION=$(get_version "package.json")
+if [ -z "$NEW_VERSION" ]; then
+  echo "Failed to determine new version from package.json." >&2
+  exit 1
+fi
 
 bump_package_version() {
   local dir="$1"
