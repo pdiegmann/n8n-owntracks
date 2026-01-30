@@ -32,7 +32,7 @@ if [ -n "$(git status --porcelain)" ]; then
   exit 1
 fi
 
-DEFAULT_BRANCH=$(git remote show origin 2>/dev/null | sed -n '/HEAD branch/s/.*: //p' | head -n 1)
+DEFAULT_BRANCH=$(git remote show origin 2>/dev/null | sed -n '/^[[:space:]]*HEAD branch:[[:space:]]*/s/.*:[[:space:]]*//p' | head -n 1)
 CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD)
 DEFAULT_BRANCH=$(printf '%s' "$DEFAULT_BRANCH" | tr -d '[:space:]')
 
@@ -72,15 +72,19 @@ trap rollback_versions ERR INT TERM
 
 read_package_version() {
   local rel_path="$1"
-  local file_path="${ROOT_DIR}/${rel_path}"
-  if [ ! -f "$file_path" ]; then
-    echo "Missing package file: $file_path" >&2
-    exit 1
-  fi
-  local script
-  read -r -d '' script <<'EOF'
+  local package_file
+  for package_file in "${PACKAGE_FILES[@]}"; do
+    if [ "$rel_path" = "$package_file" ]; then
+      local file_path="${ROOT_DIR}/${rel_path}"
+      if [ ! -f "$file_path" ]; then
+        echo "Missing package file: $file_path" >&2
+        exit 1
+      fi
+      local script
+      read -r -d '' script <<'EOF'
+const fs = require('fs');
 try {
-  const pkg = require(process.argv[1]);
+  const pkg = JSON.parse(fs.readFileSync(process.argv[1], 'utf8'));
   if (!pkg.version) {
     throw new Error('missing version');
   }
@@ -90,16 +94,21 @@ try {
   process.exit(1);
 }
 EOF
-  local version
-  if ! version=$(bun -e "$script" "$file_path"); then
-    echo "Failed to read version from $file_path" >&2
-    exit 1
-  fi
-  if [ -z "$version" ]; then
-    echo "Failed to read version from $file_path" >&2
-    exit 1
-  fi
-  echo "$version"
+      local version
+      if ! version=$(bun -e "$script" "$file_path"); then
+        echo "Failed to read version from $file_path" >&2
+        exit 1
+      fi
+      if [ -z "$version" ]; then
+        echo "Failed to read version from $file_path" >&2
+        exit 1
+      fi
+      echo "$version"
+      return 0
+    fi
+  done
+  echo "Unexpected package path: $rel_path" >&2
+  exit 1
 }
 
 bun version "$RELEASE_TYPE" --no-git-tag-version >/dev/null
