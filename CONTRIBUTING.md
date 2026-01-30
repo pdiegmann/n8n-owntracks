@@ -31,6 +31,34 @@ Thank you for your interest in contributing to n8n-owntracks!
 3. Update the README.md with details of changes if applicable
 4. The PR will be reviewed by maintainers
 
+## Release Process (Maintainers)
+
+### Backend Docker Image
+
+1. Merge changes to the default branch.
+2. Tag a release like `backend-v1.2.3`:
+```bash
+git tag backend-v1.2.3
+git push origin HEAD --follow-tags
+```
+3. The `release-backend.yml` workflow builds and pushes `latest` and the versioned tag to GHCR.
+
+### n8n Node Package (npm)
+
+1. Bump the package version (from repo root):
+```bash
+npm --prefix packages/n8n-nodes-owntracks version patch --no-git-tag-version
+```
+2. Commit the version bump, then tag and push a release like `nodes-v1.2.3`:
+```bash
+git add packages/n8n-nodes-owntracks/package.json
+git commit -m "chore: bump n8n node version"
+git tag nodes-v1.2.3
+git push origin HEAD --follow-tags
+```
+3. The `release-n8n-node.yml` workflow builds and publishes to npm using `NPM_TOKEN` (configured in repository secrets).
+   For manual releases, you can substitute `bun publish` in place of `npm publish` if preferred, but verify npm-specific lifecycle hooks/config behave as expected.
+
 ## Bug Reports
 
 When filing a bug report, please include:

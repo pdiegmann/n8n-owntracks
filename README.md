@@ -45,11 +45,22 @@ n8n-owntracks/
 ## Quick Start
 
 ### Prerequisites
-- Bun >= 1.3.0
+- Docker + Docker Compose (recommended for production)
+- Bun >= 1.3.0 (development/builds; can also be used for production runtime if desired)
 - n8n instance (for using the custom nodes)
+
+For production deployments, use the Docker Compose flow below and install the n8n node via npm, Bun, or the n8n UI.
 
 ### Installation
 
+#### Production (Docker Compose)
+```bash
+cp packages/backend/config.example.yaml config.yaml
+# Edit config.yaml for production settings (e.g., auth). The database path is handled by DB_PATH in docker-compose.yml.
+docker-compose up -d
+```
+
+#### Local development (Bun)
 1. **Clone the repository:**
 ```bash
 git clone https://github.com/pdiegmann/n8n-owntracks.git
@@ -115,8 +126,10 @@ cd ~/.n8n
 bun link n8n-nodes-owntracks
 ```
 
-#### Option 2: Install from Bun (when published)
+#### Option 2: Install from npm (when published)
 ```bash
+npm install -g n8n-nodes-owntracks
+# or with Bun:
 bun add -g n8n-nodes-owntracks
 ```
 
@@ -257,39 +270,21 @@ OwnTracks HTTP mode can send device identifiers via headers. The backend uses th
 
 ### Docker (Recommended)
 
-Create a `Dockerfile` for the backend:
+Use the provided Dockerfile and docker-compose.yml for production deployments:
 
-```dockerfile
-FROM oven/bun:1.3.8-alpine
-
-WORKDIR /app
-
-# Copy package files
-COPY package.json ./
-COPY packages/backend/package.json ./packages/backend/
-
-# Install dependencies
-RUN bun install --production
-
-# Copy source
-COPY packages/backend ./packages/backend
-COPY tsconfig.json ./
-
-# Build
-RUN bun run build --workspace=@n8n-owntracks/backend
-
-# Expose port
-EXPOSE 3000
-
-# Start server
-CMD ["bun", "packages/backend/dist/index.js"]
-```
-
-Build and run:
 ```bash
-docker build -t owntracks-backend .
-docker run -p 3000:3000 -v $(pwd)/config.yaml:/app/config.yaml -v $(pwd)/data:/app/data owntracks-backend
+cp packages/backend/config.example.yaml config.yaml
+# Edit config.yaml for production settings (e.g., auth). The database path is handled by DB_PATH in docker-compose.yml.
+docker-compose up -d
 ```
+
+The backend image build uses the root Dockerfile and outputs a runtime container that listens on port 3000.
+
+### Production Install Notes
+
+- Prefer Docker Compose for running the backend in production.
+- Install the n8n node with npm, Bun, or the n8n community nodes UI.
+- Bun can also run the backend in production if desired, but Docker is still recommended.
 
 ### Systemd Service
 
@@ -323,7 +318,7 @@ sudo systemctl start owntracks-backend
 ```nginx
 server {
     listen 80;
-    server_name owntracks.example.com;
+    server_name yourdomain.com;
 
     location / {
         proxy_pass http://localhost:3000;
@@ -334,6 +329,64 @@ server {
     }
 }
 ```
+
+### Traefik + Docker Compose Example
+
+Create and edit the backend configuration before starting:
+
+```bash
+cp packages/backend/config.example.yaml config.yaml
+# Edit config.yaml for production settings (e.g., auth). The database path is handled by DB_PATH in the compose example below.
+```
+
+```yaml
+version: "3.8"
+services:
+  owntracks-backend:
+    image: ghcr.io/pdiegmann/n8n-owntracks-backend:latest
+    environment:
+      - NODE_ENV=production
+      - CONFIG_PATH=/app/packages/backend/config.yaml
+      - DB_PATH=/app/data/owntracks.db
+    volumes:
+      - ./config.yaml:/app/packages/backend/config.yaml:ro
+      - ./data:/app/data
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.owntracks.rule=Host(`yourdomain.com`)"
+      - "traefik.http.routers.owntracks.entrypoints=websecure"
+      - "traefik.http.routers.owntracks.tls.certresolver=letsencrypt"
+      - "traefik.http.services.owntracks.loadbalancer.server.port=3000"
+    networks:
+      - web
+
+  traefik:
+    image: traefik:v2.11
+    command:
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--entrypoints.web.address=:80"
+      - "--entrypoints.websecure.address=:443"
+      - "--entrypoints.web.http.redirections.entrypoint.to=websecure"
+      - "--entrypoints.web.http.redirections.entrypoint.scheme=https"
+      - "--certificatesresolvers.letsencrypt.acme.tlschallenge=true"
+      - "--certificatesresolvers.letsencrypt.acme.email=your-email@yourdomain.com"
+      - "--certificatesresolvers.letsencrypt.acme.storage=/letsencrypt/acme.json"
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+      - "./letsencrypt:/letsencrypt"
+    networks:
+      - web
+
+networks:
+  web:
+    external: true
+```
+
+Create the external network once with `docker network create web`.
 
 ## Security Considerations
 

@@ -4,11 +4,12 @@ This guide will help you get up and running with n8n-owntracks in minutes.
 
 ## Prerequisites
 
-- Bun 1.3+ installed
+- Docker + Docker Compose (recommended for production)
+- Bun 1.3+ installed (development/builds; can also be used for production runtime if desired)
 - OwnTracks mobile app (iOS or Android)
 - n8n instance (optional, for using the trigger nodes)
 
-## Step 1: Install and Build
+## Step 1: Install and Build (Local Development)
 
 ```bash
 git clone https://github.com/pdiegmann/n8n-owntracks.git
@@ -117,6 +118,16 @@ docker-compose up -d
 # Check logs
 docker-compose logs -f
 ```
+
+## n8n Node Installation (Production)
+
+```bash
+npm install -g n8n-nodes-owntracks
+# or with Bun:
+bun add -g n8n-nodes-owntracks
+```
+
+Restart n8n, and you'll see the "OwnTracks Trigger" node available.
 
 ## Troubleshooting
 
