@@ -32,7 +32,7 @@ if [ -n "$(git status --porcelain)" ]; then
   exit 1
 fi
 
-DEFAULT_BRANCH=$(git remote show origin 2>/dev/null | sed -n '/^[[:space:]]*HEAD branch:[[:space:]]*/s/.*:[[:space:]]*//p' | head -n 1)
+DEFAULT_BRANCH=$(git remote show origin 2>/dev/null | sed -n 's/^[[:space:]]*HEAD branch:[[:space:]]*//p' | head -n 1)
 CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD)
 DEFAULT_BRANCH=$(printf '%s' "$DEFAULT_BRANCH" | tr -d '[:space:]')
 
