@@ -36,7 +36,11 @@ DEFAULT_BRANCH=$(git symbolic-ref refs/remotes/origin/HEAD 2>/dev/null | sed 's!
 CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD)
 
 if [ -z "$DEFAULT_BRANCH" ]; then
-  echo "Unable to determine default branch from origin/HEAD. Ensure the remote default branch is set before releasing." >&2
+  DEFAULT_BRANCH=$(git remote show origin 2>/dev/null | sed -n 's/  HEAD branch: //p' | head -n 1)
+fi
+
+if [ -z "$DEFAULT_BRANCH" ]; then
+  echo "Unable to determine default branch. Run 'git remote set-head origin --auto' to set origin/HEAD." >&2
   exit 1
 fi
 
@@ -71,19 +75,23 @@ trap rollback_versions ERR INT TERM
 
 validate_package_path() {
   local rel_path="$1"
-  case "$rel_path" in
-    package.json|packages/backend/package.json|packages/n8n-nodes-owntracks/package.json) ;;
-    *)
-      echo "Unexpected package path: $rel_path" >&2
-      exit 1
-      ;;
-  esac
+  local allowed="false"
+  for package_file in "${PACKAGE_FILES[@]}"; do
+    if [ "$rel_path" = "$package_file" ]; then
+      allowed="true"
+      break
+    fi
+  done
+  if [ "$allowed" != "true" ]; then
+    echo "Unexpected package path: $rel_path" >&2
+    exit 1
+  fi
 }
 
 get_version() {
   local rel_path="$1"
   validate_package_path "$rel_path"
-  FILE_PATH="${ROOT_DIR}/${rel_path}" bun -e "console.log(require(process.env.FILE_PATH).version)"
+  FILE_PATH="${ROOT_DIR}/${rel_path}" bun -e "const fs = require('fs'); const pkg = JSON.parse(fs.readFileSync(process.env.FILE_PATH, 'utf8')); console.log(pkg.version)"
 }
 
 bun version "$RELEASE_TYPE" --no-git-tag-version >/dev/null
