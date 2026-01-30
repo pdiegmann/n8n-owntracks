@@ -11,6 +11,7 @@ services:
     environment:
       - NODE_ENV=production
       - CONFIG_PATH=/app/packages/backend/config.yaml
+      - DB_PATH=/app/data/owntracks.db
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:3000/health"]

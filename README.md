@@ -56,7 +56,7 @@ For production deployments, use the Docker Compose flow below and install the n8
 #### Production (Docker Compose)
 ```bash
 cp packages/backend/config.example.yaml config.yaml
-# Edit config.yaml for production. Change database.path from ./data/owntracks.db to /app/data/owntracks.db for persistence.
+# Edit config.yaml for production settings (e.g., auth). The database path is handled by DB_PATH in docker-compose.yml.
 docker-compose up -d
 ```
 
@@ -274,7 +274,7 @@ Use the provided Dockerfile and docker-compose.yml for production deployments:
 
 ```bash
 cp packages/backend/config.example.yaml config.yaml
-# Edit config.yaml for production. Change database.path from ./data/owntracks.db to /app/data/owntracks.db for persistence.
+# Edit config.yaml for production settings (e.g., auth). The database path is handled by DB_PATH in docker-compose.yml.
 docker-compose up -d
 ```
 
@@ -336,7 +336,7 @@ Create and edit the backend configuration before starting:
 
 ```bash
 cp packages/backend/config.example.yaml config.yaml
-# Edit config.yaml for production. Change database.path from ./data/owntracks.db to /app/data/owntracks.db for persistence.
+# Edit config.yaml for production settings (e.g., auth). The database path is handled by DB_PATH in the compose example below.
 ```
 
 ```yaml
