@@ -1,6 +1,6 @@
 {
   "name": "n8n-nodes-owntracks",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "description": "n8n community node for OwnTracks location tracking integration",
   "keywords": [
     "n8n-community-node-package",

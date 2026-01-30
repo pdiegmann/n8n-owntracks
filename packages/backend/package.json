@@ -1,6 +1,6 @@
 {
   "name": "@n8n-owntracks/backend",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "description": "Backend API for OwnTracks HTTP JSON endpoints",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
