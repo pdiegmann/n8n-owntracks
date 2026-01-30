@@ -32,8 +32,13 @@ if [ -n "$(git status --porcelain)" ]; then
   exit 1
 fi
 
-DEFAULT_BRANCH=$(git symbolic-ref refs/remotes/origin/HEAD | sed 's!^refs/remotes/origin/!!')
+DEFAULT_BRANCH=$(git symbolic-ref refs/remotes/origin/HEAD 2>/dev/null | sed 's!^refs/remotes/origin/!!')
 CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD)
+
+if [ -z "$DEFAULT_BRANCH" ]; then
+  echo "Unable to determine default branch from origin/HEAD. Ensure the remote default branch is set before releasing." >&2
+  exit 1
+fi
 
 if [ "$CURRENT_BRANCH" != "$DEFAULT_BRANCH" ]; then
   echo "Release script must be run from the default branch ('$DEFAULT_BRANCH'), but you are on '$CURRENT_BRANCH'." >&2
@@ -64,8 +69,21 @@ rollback_versions() {
 
 trap rollback_versions ERR INT TERM
 
+validate_package_path() {
+  local rel_path="$1"
+  case "$rel_path" in
+    package.json|packages/backend/package.json|packages/n8n-nodes-owntracks/package.json) ;;
+    *)
+      echo "Unexpected package path: $rel_path" >&2
+      exit 1
+      ;;
+  esac
+}
+
 get_version() {
-  FILE_PATH="${ROOT_DIR}/$1" bun -e "console.log(require(process.env.FILE_PATH).version)"
+  local rel_path="$1"
+  validate_package_path "$rel_path"
+  FILE_PATH="${ROOT_DIR}/${rel_path}" bun -e "console.log(require(process.env.FILE_PATH).version)"
 }
 
 bun version "$RELEASE_TYPE" --no-git-tag-version >/dev/null
