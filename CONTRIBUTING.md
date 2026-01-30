@@ -45,14 +45,14 @@ git push origin HEAD --follow-tags
 
 ### n8n Node Package (npm)
 
-1. Bump the package version:
+1. Bump the package version and update the lockfile (from repo root):
 ```bash
-cd packages/n8n-nodes-owntracks
-npm version patch --no-git-tag-version
+npm --prefix packages/n8n-nodes-owntracks version patch --no-git-tag-version
+bun install
 ```
-2. Commit and push the version bump, then tag a release like `nodes-v1.2.3`:
+2. Commit the version bump and lockfile, then tag and push a release like `nodes-v1.2.3`:
 ```bash
-git add package.json
+git add packages/n8n-nodes-owntracks/package.json bun.lockb
 git commit -m "chore: bump n8n node version"
 git tag nodes-v1.2.3
 git push origin HEAD --follow-tags
