@@ -143,7 +143,6 @@ if git push origin HEAD --follow-tags; then
   trap - ERR INT TERM
   echo "Release v${NEW_VERSION} created and pushed."
 else
-  rollback_versions
   echo "Failed to push release v${NEW_VERSION}." >&2
-  exit 1
+  rollback_versions
 fi
