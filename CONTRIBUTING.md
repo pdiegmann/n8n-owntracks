@@ -52,7 +52,7 @@ bun install
 ```
 2. Commit the version bump and lockfile, then tag and push a release like `nodes-v1.2.3`:
 ```bash
-git add packages/n8n-nodes-owntracks/package.json bun.lockb
+git add packages/n8n-nodes-owntracks/package.json bun.lock
 git commit -m "chore: bump n8n node version"
 git tag nodes-v1.2.3
 git push origin HEAD --follow-tags
