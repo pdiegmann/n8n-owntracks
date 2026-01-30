@@ -336,7 +336,7 @@ Create and edit the backend configuration before starting:
 
 ```bash
 cp packages/backend/config.example.yaml config.yaml
-# Change database.path from ./data/owntracks.db to /app/data/owntracks.db for persistence.
+# Edit config.yaml for production. Change database.path from ./data/owntracks.db to /app/data/owntracks.db for persistence.
 ```
 
 ```yaml
