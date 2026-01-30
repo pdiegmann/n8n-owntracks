@@ -85,7 +85,7 @@ jobs:
         working-directory: packages/n8n-nodes-owntracks
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-        run: npm publish --access public
+        run: npm publish
 
       - name: Build and push backend image
         uses: docker/build-push-action@v6
