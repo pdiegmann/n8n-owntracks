@@ -34,10 +34,10 @@ rollback_versions() {
   git checkout -- "${PACKAGE_FILES[@]}"
 }
 
-trap rollback_versions ERR
+trap rollback_versions ERR INT TERM
 
-NEW_VERSION=$(npm version "$RELEASE_TYPE" --no-git-tag-version)
-NEW_VERSION="${NEW_VERSION#v}"
+npm version "$RELEASE_TYPE" --no-git-tag-version >/dev/null
+NEW_VERSION=$(node -p "require('./package.json').version")
 
 npm --prefix packages/backend version "$NEW_VERSION" --no-git-tag-version
 npm --prefix packages/n8n-nodes-owntracks version "$NEW_VERSION" --no-git-tag-version
