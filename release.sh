@@ -49,7 +49,8 @@ rollback_versions() {
     git reset --hard HEAD~1 >/dev/null 2>&1
     COMMIT_CREATED="false"
   fi
-  git checkout HEAD -- "${PACKAGE_FILES[@]}" >/dev/null 2>&1
+  git restore --staged "${PACKAGE_FILES[@]}" >/dev/null 2>&1
+  git restore "${PACKAGE_FILES[@]}" >/dev/null 2>&1
   exit 1
 }
 
@@ -65,7 +66,7 @@ NEW_VERSION=$(get_version "package.json")
 bump_package_version() {
   local dir="$1"
   cd "${ROOT_DIR}/${dir}"
-  bun version "$NEW_VERSION" --no-git-tag-version
+  bun version "$NEW_VERSION" --no-git-tag-version >/dev/null
   cd "$ROOT_DIR"
 }
 
@@ -91,6 +92,11 @@ COMMIT_CREATED="true"
 git tag "v${NEW_VERSION}"
 TAG_CREATED="true"
 
-git push origin HEAD --follow-tags
-trap - ERR INT TERM
-echo "Release v${NEW_VERSION} created and pushed."
+if git push origin HEAD --follow-tags; then
+  trap - ERR INT TERM
+  echo "Release v${NEW_VERSION} created and pushed."
+else
+  rollback_versions
+  echo "Failed to push release v${NEW_VERSION}." >&2
+  exit 1
+fi
