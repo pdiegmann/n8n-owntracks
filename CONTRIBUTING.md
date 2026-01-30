@@ -39,7 +39,7 @@ Thank you for your interest in contributing to n8n-owntracks!
 2. Tag a release like `backend-v1.2.3`:
 ```bash
 git tag backend-v1.2.3
-git push origin backend-v1.2.3
+git push origin HEAD --follow-tags
 ```
 3. The `release-backend.yml` workflow builds and pushes `latest` and the versioned tag to GHCR.
 

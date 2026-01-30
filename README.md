@@ -316,7 +316,7 @@ sudo systemctl start owntracks-backend
 ```nginx
 server {
     listen 80;
-    server_name owntracks.example.com;
+    server_name yourdomain.com;
 
     location / {
         proxy_pass http://localhost:3000;
@@ -360,7 +360,7 @@ services:
       - "--entrypoints.web.http.redirections.entrypoint.to=websecure"
       - "--entrypoints.web.http.redirections.entrypoint.scheme=https"
       - "--certificatesresolvers.letsencrypt.acme.tlschallenge=true"
-      - "--certificatesresolvers.letsencrypt.acme.email=your-email@example.com"
+      - "--certificatesresolvers.letsencrypt.acme.email=your-email@yourdomain.com"
       - "--certificatesresolvers.letsencrypt.acme.storage=/letsencrypt/acme.json"
     ports:
       - "80:80"
