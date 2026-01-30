@@ -18,7 +18,7 @@ case "$RELEASE_TYPE" in
     ;;
 esac
 
-for command in git npm node; do
+for command in git bun node; do
   if ! command -v "$command" >/dev/null 2>&1; then
     echo "Missing required command: $command" >&2
     exit 1
@@ -31,16 +31,17 @@ if [ -n "$(git status --porcelain)" ]; then
 fi
 
 rollback_versions() {
-  git checkout -- "${PACKAGE_FILES[@]}"
+  echo "An error occurred. Rolling back version changes..." >&2
+  git checkout HEAD -- "${PACKAGE_FILES[@]}"
 }
 
 trap rollback_versions ERR INT TERM
 
-npm version "$RELEASE_TYPE" --no-git-tag-version >/dev/null
+bun version "$RELEASE_TYPE" --no-git-tag-version >/dev/null
 NEW_VERSION=$(node -p "require('./package.json').version")
 
-npm --prefix packages/backend version "$NEW_VERSION" --no-git-tag-version
-npm --prefix packages/n8n-nodes-owntracks version "$NEW_VERSION" --no-git-tag-version
+bun --prefix packages/backend version "$NEW_VERSION" --no-git-tag-version
+bun --prefix packages/n8n-nodes-owntracks version "$NEW_VERSION" --no-git-tag-version
 
 for pkg in "${PACKAGE_FILES[@]}"; do
   CURRENT_VERSION=$(node -p "require('./$pkg').version")
@@ -55,11 +56,11 @@ if git rev-parse -q --verify "refs/tags/v${NEW_VERSION}" >/dev/null; then
   exit 1
 fi
 
-trap - ERR
-
 git add "${PACKAGE_FILES[@]}"
 git commit -m "chore: release v${NEW_VERSION}"
 git tag "v${NEW_VERSION}"
+
+trap - ERR
 
 if git push origin HEAD --follow-tags; then
   echo "Release v${NEW_VERSION} created and pushed."
