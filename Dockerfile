@@ -7,15 +7,15 @@ COPY package.json ./
 COPY tsconfig.json ./
 COPY packages/backend/package.json ./packages/backend/
 
-# Install dependencies (backend only)
-RUN bun install --production
+# Install dependencies (including build-time tools)
+RUN bun install
 
 # Copy backend source
 COPY packages/backend/src ./packages/backend/src
 COPY packages/backend/tsconfig.json ./packages/backend/
 
 # Build backend
-RUN bun run build --workspace=@n8n-owntracks/backend
+RUN bun run --filter @n8n-owntracks/backend build
 
 # Create data directory
 RUN mkdir -p /app/data
