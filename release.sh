@@ -106,14 +106,14 @@ EOF
   echo "$version"
 }
 
-bun version "$RELEASE_TYPE" --no-git-tag-version >/dev/null
+bun pm version "$RELEASE_TYPE" --no-git-tag-version >/dev/null
 NEW_VERSION=$(read_package_version "package.json")
 
 bump_package_version() {
   local dir="$1"
   (
     cd "${ROOT_DIR}/${dir}"
-    bun version "$NEW_VERSION" --no-git-tag-version >/dev/null
+    bun pm version "$NEW_VERSION" --no-git-tag-version >/dev/null
   )
 }
 
