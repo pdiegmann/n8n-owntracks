@@ -50,8 +50,11 @@ git push origin backend-v1.2.3
 cd packages/n8n-nodes-owntracks
 npm version patch --no-git-tag-version
 ```
-2. Commit the version bump, then tag a release like `nodes-v1.2.3`:
+2. Commit and push the version bump, then tag a release like `nodes-v1.2.3`:
 ```bash
+git add package.json
+git commit -m "chore: bump n8n node version"
+git push
 git tag nodes-v1.2.3
 git push origin nodes-v1.2.3
 ```

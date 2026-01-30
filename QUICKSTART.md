@@ -129,11 +129,6 @@ bun add -g n8n-nodes-owntracks
 
 Restart n8n, and you'll see the "OwnTracks Trigger" node available.
 
-## Release Automation (Maintainers)
-
-- Tag `backend-vX.Y.Z` to trigger the GHCR Docker build and push workflow.
-- Tag `nodes-vX.Y.Z` (after bumping `packages/n8n-nodes-owntracks/package.json`) to publish to npm via GitHub Actions (the workflow uses `npm publish`, but `bun publish` can be used for manual releases; verify npm-specific hooks/config behave as expected).
-
 ## Troubleshooting
 
 ### Backend won't start

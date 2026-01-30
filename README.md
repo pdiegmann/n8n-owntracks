@@ -278,43 +278,11 @@ docker-compose up -d
 
 The backend image build uses the root Dockerfile and outputs a runtime container that listens on port 3000.
 
-## Release & Publishing
+### Production Install Notes
 
-### Automated releases (GitHub Actions)
-
-#### Backend Docker image (GHCR)
-1. Merge changes to the default branch.
-2. Create and push a tag like `backend-v1.2.3`:
-```bash
-git tag backend-v1.2.3
-git push origin backend-v1.2.3
-```
-3. The `release-backend.yml` workflow builds and pushes:
-   - `ghcr.io/pdiegmann/n8n-owntracks-backend:1.2.3` (from `backend-v1.2.3`)
-   - `ghcr.io/pdiegmann/n8n-owntracks-backend:latest`
-
-#### n8n node package (npm)
-1. Update the version in `packages/n8n-nodes-owntracks/package.json`:
-```bash
-cd packages/n8n-nodes-owntracks
-npm version patch --no-git-tag-version
-```
-2. Commit the version bump, then create and push a matching tag like `nodes-v1.2.3`:
-```bash
-git tag nodes-v1.2.3
-git push origin nodes-v1.2.3
-```
-3. The `release-n8n-node.yml` workflow builds and publishes to npm using the `NPM_TOKEN` secret.
-   For manual releases, you can substitute `bun publish` in place of `npm publish` if preferred, but verify npm-specific lifecycle hooks/config behave as expected.
-
-Ensure repository secrets include `NPM_TOKEN` (npm publish token with access to the package).
-
-After publishing, users can install via:
-```bash
-npm install -g n8n-nodes-owntracks
-# or with Bun:
-bun add -g n8n-nodes-owntracks
-```
+- Prefer Docker Compose for running the backend in production.
+- Install the n8n node with npm, Bun, or the n8n community nodes UI.
+- Bun can also run the backend in production if desired, but Docker is still recommended.
 
 ### Systemd Service
 
@@ -442,12 +410,6 @@ bun run build --workspace=n8n-nodes-owntracks
 # Clean build artifacts
 bun run clean
 ```
-
-### Production Install Notes
-
-- Prefer Docker Compose for running the backend in production.
-- Install the n8n node with npm, Bun, or the n8n community nodes UI.
-- Bun can also run the backend in production if desired, but Docker is still recommended.
 
 ### Testing Locally
 
