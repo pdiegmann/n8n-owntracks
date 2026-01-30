@@ -76,17 +76,14 @@ trap rollback_versions ERR INT TERM
 
 validate_package_path() {
   local rel_path="$1"
-  local allowed="false"
+  local package_file
   for package_file in "${PACKAGE_FILES[@]}"; do
     if [ "$rel_path" = "$package_file" ]; then
-      allowed="true"
-      break
+      return 0
     fi
   done
-  if [ "$allowed" != "true" ]; then
-    echo "Unexpected package path: $rel_path" >&2
-    exit 1
-  fi
+  echo "Unexpected package path: $rel_path" >&2
+  exit 1
 }
 
 read_package_version() {
@@ -128,9 +125,10 @@ NEW_VERSION=$(read_package_version "package.json")
 
 bump_package_version() {
   local dir="$1"
-  cd "${ROOT_DIR}/${dir}"
-  bun version "$NEW_VERSION" --no-git-tag-version >/dev/null
-  cd "$ROOT_DIR"
+  (
+    cd "${ROOT_DIR}/${dir}"
+    bun version "$NEW_VERSION" --no-git-tag-version >/dev/null
+  )
 }
 
 bump_package_version "packages/backend"
